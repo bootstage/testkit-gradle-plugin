@@ -1,18 +1,21 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Date
 
 plugins {
     `java-library`
-    `java-gradle-plugin`
     `maven-publish`
+    `signing`
+
+    id("com.gradle.plugin-publish") version "0.12.0"
+    id("de.marcphilipp.nexus-publish") version "0.4.0"
+    id("io.codearte.nexus-staging") version "0.21.2"
     id("org.jetbrains.dokka") version "1.4.10"
-    id("org.jetbrains.kotlin.jvm") version "1.3.72"
-    id("com.jfrog.bintray") version "1.8.5"
+
+    kotlin("jvm") version embeddedKotlinVersion
 }
 
 group = "io.bootstage.testkit"
-version = "0.1.0"
-description = "Test kit for Gradle plugin testing"
+version = "1.0.0"
+description = "Testkit plugin for custom Android Gradle plugin testing"
 
 repositories {
     mavenLocal()
@@ -28,100 +31,100 @@ dependencies {
 
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.didiglobal.booster:booster-build:2.4.0")
+    compileOnly("com.android.tools.build:gradle:3.0.0")
+    testCompileOnly("com.android.tools.build:gradle:3.0.0")
 
     dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.10")
 }
 
-gradlePlugin {
-    plugins {
-        create("gradleTestPlugin") {
-            id = "io.bootstage.testkit"
-            implementationClass = "io.bootstage.testkit.gradle.TestKitPlugin"
-        }
-    }
-}
+val OSSRH_USERNAME = project.properties["OSSRH_USERNAME"] as? String ?: System.getenv("OSSRH_USERNAME")
+val OSSRH_PASSWORD = project.properties["OSSRH_PASSWORD"] as? String ?: System.getenv("OSSRH_PASSWORD")
 
-
-val sourcesJar by tasks.creating(Jar::class) {
+val sourcesJar by tasks.registering(Jar::class) {
+    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
-val generateJavadoc by tasks.creating(Jar::class) {
+val generateDokkaHtml by tasks.registering(Copy::class) {
     dependsOn("dokkaHtml")
+    from(tasks["dokkaHtml"].property("outputDirectory"))
+    into(project.file("docs"))
+}
+
+val generateJavadoc by tasks.registering(Jar::class) {
+    dependsOn("generateDokkaHtml")
     group = "jar"
     archiveClassifier.set("javadoc")
     from(tasks["dokkaHtml"].property("outputDirectory"))
 }
 
-tasks {
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+}
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(OSSRH_USERNAME)
+            password.set(OSSRH_PASSWORD)
+        }
     }
+}
 
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                groupId = "${project.group}"
-                artifactId = project.name
-                version = "${project.version}"
+nexusStaging {
+    packageGroup = "io.bootstage"
+    username = OSSRH_USERNAME
+    password = OSSRH_PASSWORD
+    numberOfRetries = 50
+    delayBetweenRetriesInMillis = 3000
+}
 
-                from(getComponents()["java"])
+publishing {
+    repositories {
+        maven {
+            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
+        }
+    }
+    publications {
+        create<MavenPublication>("mavenJava") {
+            groupId = "${project.group}"
+            artifactId = project.name
+            version = "${project.version}"
 
-                artifact(sourcesJar)
-                artifact(generateJavadoc)
+            from(components["java"])
 
-                pom.withXml {
-                    asNode().apply {
-                        appendNode("name", project.name)
-                        appendNode("description", "${project.description}")
-                        appendNode("url", "https://github.com/bootstage/${project.name}")
-                        appendNode("licenses").appendNode("license").apply {
-                            appendNode("name", "Apache-2.0")
-                            appendNode("url", "https://www.apache.org/licenses/LICENSE-2.0.txt")
-                            appendNode("distribution", "repo")
-                        }
-                        appendNode("developers").appendNode("developer").apply {
-                            appendNode("id", "johnsonlee")
-                            appendNode("name", "Johnson Lee")
-                        }
-                        appendNode("scm").apply {
-                            appendNode("url", "https://github.com/bootstage/${project.name}")
-                            appendNode("connection", "scm:git:git://github.com/bootstage/${project.name}.git")
-                            appendNode("developerConnection", "scm:git:git@github.com:bootstage/${project.name}.git")
-                        }
+            artifact(sourcesJar.get())
+            artifact(generateJavadoc.get())
+
+            pom {
+                name.set(project.name)
+                description.set(project.description)
+                url.set("https://github.com/bootstage/${project.name}")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
+                }
+                developers {
+                    developer {
+                        id.set("johnsonlee")
+                        name.set("Johnson Lee")
+                        email.set("g.johnsonlee@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/bootstage/${project.name}.git")
+                    developerConnection.set("scm:git:git@github.com:bootstage/${project.name}.git")
+                    url.set("https://github.com/bootstage/${project.name}")
                 }
             }
         }
     }
 }
 
-bintray {
-    user = "${project.findProperty("BINTRAY_USER") ?: System.getenv("BINTRAY_USER")}"
-    key = "${project.findProperty("BINTRAY_KEY") ?: System.getenv("BINTRAY_KEY")}"
-    publish = true
-
-    pkg.apply {
-        repo = "testkit"
-        name = project.name
-        userOrg = "bootstage"
-        githubRepo = "bootstage/${project.name}"
-        vcsUrl = "https://github.com/bootstage/${project.name}"
-        desc = project.description
-        description = project.description
-        setLabels("kotlin", "gradle", "testing", "testkit")
-        setLicenses("Apache-2.0")
-        websiteUrl = "https://bootstage.io/testkit-gradle"
-        issueTrackerUrl = "https://github.com/bootstage/${project.name}/issues"
-        githubReleaseNotesFile = "README.md"
-
-        version.apply {
-            name = "${project.version}"
-            desc = project.description
-            released = "${Date()}"
-            vcsTag = "${project.version}"
-        }
-    }
+signing {
+    sign(publishing.publications["mavenJava"])
 }

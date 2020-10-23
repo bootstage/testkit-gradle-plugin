@@ -2,12 +2,10 @@ package io.bootstage.testkit.gradle.rules
 
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.gradle.testkit.runner.internal.PluginUnderTestMetadataReading
 import org.gradle.util.GradleVersion
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
-import java.io.PrintWriter
 import kotlin.test.fail
 
 /**
@@ -43,16 +41,13 @@ open class GradleExecutor(
 ) : TestWatcher() {
 
     override fun finished(description: Description) {
-        val classpath = PluginUnderTestMetadataReading.readImplementationClasspath()
-        val additional = description.testClass.protectionDomain.codeSource.location?.file?.let(::File)?.let(::listOf)
-                ?: emptyList()
         val result = GradleRunner.create()
                 .withArguments(*args)
                 .withGradleVersion(gradleVersion)
-                .withPluginClasspath(classpath + additional)
+                .withPluginClasspath()
                 .withProjectDir(projectDir())
-                .forwardStdError(PrintWriter(System.err, true))
-                .forwardStdOutput(PrintWriter(System.out, true))
+                .withTestKitDir(File(System.getProperty("user.home"), ".gradle"))
+                .forwardOutput()
                 .build()
         if (result.tasks.any { it.outcome == TaskOutcome.FAILED }) {
             fail()

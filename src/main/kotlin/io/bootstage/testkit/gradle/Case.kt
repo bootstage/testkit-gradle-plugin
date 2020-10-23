@@ -3,14 +3,14 @@ package io.bootstage.testkit.gradle
 import kotlin.reflect.KClass
 
 /**
- * [Unit] annotation is used for [TestUnit] running
+ * [Case] annotation is used for [TestCase] running
  *
  *
  * ```kotlin
  * class IntegrationTest {
  *
  *     @Test
- *     @Unit(SimpleTestUnit::class)
+ *     @Unit(SimpleTestCase::class)
  *     fun test() {
  *         ...
  *     }
@@ -22,6 +22,6 @@ import kotlin.reflect.KClass
  */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
-annotation class Unit(
-        val value: KClass<out TestUnit>
+annotation class Case(
+        val value: KClass<out TestCase>
 )

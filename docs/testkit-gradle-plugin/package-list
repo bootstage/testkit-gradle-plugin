@@ -1,0 +1,8 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.bootstage.testkit.gradle.rules//PLUGIN_UNDER_TEST_CLASSPATH_PROPERTIES/#/PointingToDeclaration/testkit-gradle-plugin/io.bootstage.testkit.gradle.rules/-test-case-configure-kt/get-p-l-u-g-i-n_-u-n-d-e-r_-t-e-s-t_-c-l-a-s-s-p-a-t-h_-p-r-o-p-e-r-t-i-e-s.html
+$dokka.location:io.bootstage.testkit.gradle.rules//copyFromResource/org.junit.rules.TemporaryFolder#kotlin.String#kotlin.String/PointingToDeclaration/testkit-gradle-plugin/io.bootstage.testkit.gradle.rules/-temporary-folder-kt/copy-from-resource.html
+$dokka.location:io.bootstage.testkit.gradle.rules//rule/#TypeParam(bounds=[org.junit.rules.TestRule])#kotlin.Function1[TypeParam(bounds=[org.junit.rules.TestRule]),org.junit.rules.TestRule]/PointingToDeclaration/testkit-gradle-plugin/io.bootstage.testkit.gradle.rules/-rule-chain-kt/rule.html
+io.bootstage.testkit.gradle
+io.bootstage.testkit.gradle.rules
+

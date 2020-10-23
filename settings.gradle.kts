@@ -1,4 +1,4 @@
-rootProject.name = "testkit-gradle"
+rootProject.name = "testkit-gradle-plugin"
 
 pluginManagement {
     repositories {

@@ -17,4 +17,3 @@ import org.junit.rules.TestRule
 inline fun <reified T : TestRule> rule(rule: T, block: (T) -> TestRule): TestRule {
     return RuleChain.outerRule(rule).around(block(rule))
 }
-
