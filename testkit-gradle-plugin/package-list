@@ -1,0 +1,7 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.bootstage.testkit.gradle.rules//copyFromResource/org.junit.rules.TemporaryFolder#kotlin.String#kotlin.String/PointingToDeclaration/testkit-gradle-plugin/io.bootstage.testkit.gradle.rules/-temporary-folder-kt/copy-from-resource.html
+$dokka.location:io.bootstage.testkit.gradle.rules//rule/#TypeParam(bounds=[org.junit.rules.TestRule])#kotlin.Function1[TypeParam(bounds=[org.junit.rules.TestRule]),org.junit.rules.TestRule]/PointingToDeclaration/testkit-gradle-plugin/io.bootstage.testkit.gradle.rules/-rule-chain-kt/rule.html
+io.bootstage.testkit.gradle
+io.bootstage.testkit.gradle.rules
+
