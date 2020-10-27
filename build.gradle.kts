@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "io.bootstage.testkit"
-version = "1.0.0"
+version = "1.1.0"
 description = "Testkit plugin for custom Android Gradle plugin testing"
 
 repositories {
