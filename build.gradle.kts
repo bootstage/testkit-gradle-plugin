@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
+//  `java-gradle-plugin`
     `maven-publish`
     `signing`
 
@@ -128,3 +129,12 @@ publishing {
 signing {
     sign(publishing.publications["mavenJava"])
 }
+
+//gradlePlugin {
+//    plugins {
+//        create("testkitPlugin") {
+//            id = "io.bootstage.testkit"
+//            implementationClass = "io.bootstage.testkit.gradle.TestKitPlugin"
+//        }
+//    }
+//}

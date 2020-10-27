@@ -21,7 +21,6 @@ class TestKitPlugin : Plugin<Project> {
             File(it).toURI().toURL()
         }.toTypedArray()
         val classLoader = URLClassLoader(classpath, project.buildscript.classLoader)
-        classpath.forEach(::println)
         ServiceLoaderLite.loadImplementations(TestCase::class.java, classLoader).forEach {
             it.apply(project)
         }

@@ -104,10 +104,7 @@ class SimpleIntegrationTest {
 
     @get:Rule
     val chain: RuleChain = rule(projectDir) { projectDir ->
-        val root = projectDir::getRoot
-        rule(TestUnitConfigure(root)) {
-            GradleExecutor(root)
-        }
+        GradleExecutor(projectDir::getRoot)
     }
 
     @Test

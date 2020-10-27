@@ -1,9 +1,8 @@
 package io.bootstage.testkit
 
-import io.bootstage.testkit.gradle.TestCase
 import io.bootstage.testkit.gradle.Case
+import io.bootstage.testkit.gradle.TestCase
 import io.bootstage.testkit.gradle.rules.GradleExecutor
-import io.bootstage.testkit.gradle.rules.TestCaseConfigure
 import io.bootstage.testkit.gradle.rules.copyFromResource
 import io.bootstage.testkit.gradle.rules.rule
 import org.gradle.api.Project
@@ -18,10 +17,7 @@ class TestKitPluginTest {
 
     @get:Rule
     val chain: TestRule = rule(projectDir) { projectDir ->
-        val root = projectDir::getRoot
-        rule(TestCaseConfigure(root)) {
-            GradleExecutor(root)
-        }
+            GradleExecutor(projectDir::getRoot)
     }
 
     @Test
