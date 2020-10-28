@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
-//  `java-gradle-plugin`
+    `java-gradle-plugin`
     `maven-publish`
     `signing`
 
@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "io.bootstage.testkit"
-version = "1.1.0"
+version = "1.2.0"
 description = "Testkit plugin for custom Android Gradle plugin testing"
 
 repositories {
@@ -48,14 +48,8 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().allSource)
 }
 
-val generateDokkaHtml by tasks.registering(Copy::class) {
+val javadocJar by tasks.registering(Jar::class) {
     dependsOn("dokkaHtml")
-    from(tasks["dokkaHtml"].property("outputDirectory"))
-    into(project.file("docs"))
-}
-
-val generateJavadoc by tasks.registering(Jar::class) {
-    dependsOn("generateDokkaHtml")
     group = "jar"
     archiveClassifier.set("javadoc")
     from(tasks["dokkaHtml"].property("outputDirectory"))
@@ -89,18 +83,16 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("mavenJava") {
+        withType<MavenPublication>().configureEach {
             groupId = "${project.group}"
             artifactId = project.name
             version = "${project.version}"
 
-            from(components["java"])
-
             artifact(sourcesJar.get())
-            artifact(generateJavadoc.get())
+            artifact(javadocJar.get())
 
             pom {
-                name.set(project.name)
+                name.set(provider { artifactId })
                 description.set(project.description)
                 url.set("https://github.com/bootstage/${project.name}")
                 licenses {
@@ -122,19 +114,21 @@ publishing {
                     url.set("https://github.com/bootstage/${project.name}")
                 }
             }
+
+            signing {
+                sign(this@configureEach)
+            }
         }
     }
 }
 
-signing {
-    sign(publishing.publications["mavenJava"])
+gradlePlugin {
+    plugins {
+        create("testkitPlugin") {
+            id = "io.bootstage.testkit"
+            displayName = "${id}.gradle.plugin"
+            description = project.description
+            implementationClass = "io.bootstage.testkit.gradle.TestKitPlugin"
+        }
+    }
 }
-
-//gradlePlugin {
-//    plugins {
-//        create("testkitPlugin") {
-//            id = "io.bootstage.testkit"
-//            implementationClass = "io.bootstage.testkit.gradle.TestKitPlugin"
-//        }
-//    }
-//}
