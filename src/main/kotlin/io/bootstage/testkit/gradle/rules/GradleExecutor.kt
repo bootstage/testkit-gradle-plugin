@@ -47,7 +47,6 @@ open class GradleExecutor(
     private var forwardOutput: Boolean = false
     private var forwardStdout: Boolean = false
     private var forwardStderr: Boolean = true
-    private var testKitDir: File = File(System.getProperty("user.home"), ".gradle")
 
     fun withDebug(debug: Boolean) = apply {
         this.debug = debug
@@ -67,10 +66,6 @@ open class GradleExecutor(
         this.forwardStderr = true
     }
 
-    fun withTestKitDir(dir: File) {
-        this.testKitDir = dir
-    }
-
     override fun starting(description: Description) {
         // configure SPI
         description.getAnnotation(Case::class.java)?.run {
@@ -78,7 +73,7 @@ open class GradleExecutor(
                 parentFile.mkdirs()
             }.writeText(value.java.name)
         }
-        // write extral classpath
+        // write extra classpath
         val injection = description.testClass.protectionDomain.codeSource.location.file.let(::File).let(::listOf)
         val classpath = injection.joinToString("\\:", "classpath=")
         File(projectDir(), PLUGIN_UNDER_TEST_CLASSPATH_PROPERTIES).writeText(classpath)
@@ -91,7 +86,6 @@ open class GradleExecutor(
             withGradleVersion(gradleVersion)
             withPluginClasspath()
             withProjectDir(projectDir())
-            withTestKitDir(testKitDir)
 
             if (forwardOutput) {
                 forwardOutput()
