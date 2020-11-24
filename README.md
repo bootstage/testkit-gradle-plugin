@@ -24,7 +24,7 @@ src/integrationTest/resources
 ```gradle
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.3.72'
-    id 'io.bootstage.testkit' version '1.0.0'
+    id 'io.bootstage.testkit' version '1.3.0'
 }
 
 repositories {
