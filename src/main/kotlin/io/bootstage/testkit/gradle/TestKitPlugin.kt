@@ -1,12 +1,13 @@
 package io.bootstage.testkit.gradle
 
 import io.bootstage.testkit.gradle.rules.PLUGIN_UNDER_TEST_CLASSPATH_PROPERTIES
-import io.bootstage.testkit.gradle.util.ServiceLoaderLite
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.util.GUtil
 import java.io.File
 import java.net.URLClassLoader
+import java.util.ServiceLoader
 
 /**
  * Plugin for Gradle plugin project testing
@@ -20,10 +21,16 @@ class TestKitPlugin : Plugin<Project> {
         val classpath = properties.getProperty("classpath").split(File.pathSeparator).map {
             File(it).toURI().toURL()
         }.toTypedArray()
-        val classLoader = URLClassLoader(classpath, project.buildscript.classLoader)
-        ServiceLoaderLite.loadImplementations(TestCase::class.java, classLoader).forEach {
-            it.apply(project)
+
+        val classLoader = if (project.buildscript.classLoader is URLClassLoader) {
+            URLClassLoader(classpath + (project.buildscript.classLoader as URLClassLoader).urLs, Thread.currentThread().contextClassLoader)
+        } else {
+            URLClassLoader(classpath, Thread.currentThread().contextClassLoader)
         }
+
+        ServiceLoader.load(TestCase::class.java, classLoader).asIterable().toList().takeIf(Collection<TestCase>::isNotEmpty)?.forEach {
+            it.apply(project)
+        } ?: throw GradleException("No TestCase found")
     }
 
 }
