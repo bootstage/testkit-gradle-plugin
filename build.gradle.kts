@@ -6,7 +6,7 @@ plugins {
     `maven-publish`
     `signing`
 
-    id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.gradle.plugin-publish") version "1.2.0"
     id("de.marcphilipp.nexus-publish") version "0.4.0"
     id("io.codearte.nexus-staging") version "0.21.2"
     id("org.jetbrains.dokka") version "1.4.10"
@@ -33,8 +33,8 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.didiglobal.booster:booster-build:2.4.0")
-    compileOnly("com.android.tools.build:gradle:3.0.0")
-    testCompileOnly("com.android.tools.build:gradle:3.0.0")
+    compileOnly("com.android.tools.build:gradle:8.0.0")
+    testCompileOnly("com.android.tools.build:gradle:8.0.0")
 
     dokkaHtmlPlugin("org.jetbrains.dokka:kotlin-as-java-plugin:1.4.10")
 }
@@ -42,21 +42,8 @@ dependencies {
 val OSSRH_USERNAME = project.properties["OSSRH_USERNAME"] as? String ?: System.getenv("OSSRH_USERNAME")
 val OSSRH_PASSWORD = project.properties["OSSRH_PASSWORD"] as? String ?: System.getenv("OSSRH_PASSWORD")
 
-val sourcesJar by tasks.registering(Jar::class) {
-    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
-}
-
-val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("dokkaHtml")
-    group = "jar"
-    archiveClassifier.set("javadoc")
-    from(tasks["dokkaHtml"].property("outputDirectory"))
-}
-
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 nexusPublishing {
@@ -87,9 +74,6 @@ publishing {
             groupId = "${project.group}"
             artifactId = project.name
             version = "${project.version}"
-
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
 
             pom {
                 name.set(provider { artifactId })
