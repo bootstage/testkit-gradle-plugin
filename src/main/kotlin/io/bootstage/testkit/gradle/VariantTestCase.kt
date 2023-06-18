@@ -1,9 +1,8 @@
 package io.bootstage.testkit.gradle
 
-import com.android.build.gradle.AppExtension
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.Variant
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.api.BaseVariant
 import org.gradle.api.Project
 
 /**
@@ -14,16 +13,15 @@ import org.gradle.api.Project
 abstract class VariantTestCase : TestCase {
 
     override fun apply(project: Project) {
-        project.afterEvaluate {
-            when (val android = project.getAndroid<BaseExtension>()) {
-                is AppExtension -> android.applicationVariants.forEach(::apply)
-                is LibraryExtension -> android.libraryVariants.forEach(::apply)
-                else -> TODO("Unsupported extension type: ${android.javaClass}")
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants {variant ->
+            project.afterEvaluate {
+                apply(project to variant)
             }
         }
     }
 
-    abstract fun apply(variant: BaseVariant)
+    abstract fun apply(variant: Pair<Project, Variant>)
 
 }
 
