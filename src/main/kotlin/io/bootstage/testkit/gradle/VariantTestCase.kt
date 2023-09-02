@@ -16,12 +16,12 @@ abstract class VariantTestCase : TestCase {
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants {variant ->
             project.afterEvaluate {
-                apply(project to variant)
+                apply(variant)
             }
         }
     }
 
-    abstract fun apply(variant: Pair<Project, Variant>)
+    abstract fun apply(variant: Variant)
 
 }
 
